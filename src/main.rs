@@ -1,9 +1,14 @@
-use general::promp;
+use general::leerComando;
 
 mod comandos;
 mod errores;
 mod general;
 
 fn main() {
-    promp();
+    loop {
+        let input = leerComando();
+        if input == "salir" {
+            break;
+        }
+    }
 }
