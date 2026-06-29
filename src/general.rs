@@ -1,12 +1,18 @@
-use crate::comandos::{aqui::cmd_aqui, br::cmd_br, cp::cmd_cp, ls::cmd_ls, mv::cmd_mv};
+use std::collections::HashMap;
 use std::io::{self, Write};
 
-pub enum Comandos {
-    Ls { path: Option<String> },
-    Cp { origen: String, destino: String },
-    Mv { origen: String, destino: String },
-    Br { destino: String },
-    Aqui,
+use crate::comandos::{aqui::cmd_aqui, br::cmd_br, cp::cmd_cp, ls::cmd_ls, mv::cmd_mv};
+
+type CommandFn = fn(&[String]);
+
+fn get_comandos() -> HashMap<&'static str, CommandFn> {
+    let mut map: HashMap<&'static str, CommandFn> = HashMap::new();
+    map.insert("ls", cmd_ls as CommandFn);
+    map.insert("cp", cmd_cp as CommandFn);
+    map.insert("mv", cmd_mv as CommandFn);
+    map.insert("br", cmd_br as CommandFn);
+    map.insert("aqui", cmd_aqui as CommandFn);
+    map
 }
 
 fn promp() {
@@ -30,47 +36,10 @@ pub fn parse_input(input: &str) -> Option<(String, Vec<String>)> {
     Some((comando, args))
 }
 
-pub fn map_comando(comando: String, args: Vec<String>) -> Option<Comandos> {
-    match comando.as_str() {
-        "ls" => {
-            let path = args.get(0).cloned(); // Opción para la ruta (o `None`)
-            Some(Comandos::Ls { path })
-        }
-        "cp" if args.len() == 2 => Some(Comandos::Cp {
-            origen: args[0].clone(),
-            destino: args[1].clone(),
-        }),
-        "mv" if args.len() == 2 => Some(Comandos::Mv {
-            origen: args[0].clone(),
-            destino: args[1].clone(),
-        }),
-        "br" if args.len() == 1 => Some(Comandos::Br {
-            destino: args[0].clone(),
-        }),
-        "aqui" => Some(Comandos::Aqui),
-        _ => {
-            println!("Comando no reconocido: {}", comando);
-            None
-        }
-    }
-}
-
-pub fn ejecutar_comando(comando: Comandos) {
-    match comando {
-        Comandos::Ls { path } => {
-            cmd_ls(path);
-        }
-        Comandos::Cp { origen, destino } => {
-            cmd_cp(&origen, &destino);
-        }
-        Comandos::Mv { origen, destino } => {
-            cmd_mv(&origen, &destino);
-        }
-        Comandos::Br { destino } => {
-            cmd_br(&destino);
-        }
-        Comandos::Aqui => {
-            cmd_aqui();
-        }
+pub fn ejecutar_comando(comando: &str, args: &[String]) {
+    let comandos = get_comandos();
+    match comandos.get(comando) {
+        Some(f) => f(args),
+        None => println!("Comando no reconocido: {}", comando),
     }
 }

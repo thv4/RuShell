@@ -1,4 +1,4 @@
-use general::{ejecutar_comando, leer_comando, map_comando, parse_input};
+use general::{ejecutar_comando, leer_comando, parse_input};
 
 mod comandos;
 mod errores;
@@ -11,12 +11,8 @@ fn main() {
             break;
         }
 
-        if let Some((comandos, args)) = parse_input(&input) {
-            if let Some(comando) = map_comando(comandos, args) {
-                ejecutar_comando(comando);
-            }
-        } else {
-            println!("Error al emparejar el comando");
+        if let Some((comando, args)) = parse_input(&input) {
+            ejecutar_comando(&comando, &args);
         }
     }
 }
